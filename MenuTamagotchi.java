@@ -44,12 +44,12 @@ public class MenuTamagotchi extends JFrame {
 
 
         //Se busca y coloca la imagen como logo del menu
-        ImageIcon imagenCentral = buscarImagenMenu("LogoTamagotchi.png");
+        ImageIcon imagenCentral = buscarImagenMenu("Sources/LogoTamagotchi.png");
         Image img = imagenCentral.getImage().getScaledInstance(700, 200, Image.SCALE_SMOOTH);
         ImageIcon imagenRedimensionada = new ImageIcon(img);
         JLabel etiquetaImagen = new JLabel(imagenRedimensionada);
 
-        ImageIcon imagenAnimales = buscarImagenMenu("ImagenCuadrilla.png");
+        ImageIcon imagenAnimales = buscarImagenMenu("Sources/ImagenCuadrilla.png");
         Image img2 = imagenAnimales.getImage().getScaledInstance(450, 270, Image.SCALE_SMOOTH);
         ImageIcon imagenRedimensionada2 = new ImageIcon(img2);
         JLabel etiquetaImagen2 = new JLabel(imagenRedimensionada2);
@@ -113,7 +113,7 @@ public class MenuTamagotchi extends JFrame {
         dialogo.setLayout(new BorderLayout());
 
         // Icono personalizado
-        ImageIcon iconoOptionPane = buscarImagenMenu("IconoSeleccionTamagotchi.png");
+        ImageIcon iconoOptionPane = buscarImagenMenu("Sources/IconoSeleccionTamagotchi.png");
         Image img = iconoOptionPane.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         ImageIcon icono = new ImageIcon(img);
 

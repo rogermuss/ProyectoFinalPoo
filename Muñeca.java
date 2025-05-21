@@ -6,49 +6,45 @@ public class Muñeca extends Tamagotchi implements TamagotchiActions{
 
     public Muñeca(String nombre) {
         super(nombre);
-        ImageIcon imagen1 = buscarIcono("Muñeca.png");
+        ImageIcon imagen1 = buscarIcono("Sources/Muñeca.png");
         Image img1 = imagen1.getImage().getScaledInstance(400, 200, Image.SCALE_SMOOTH);
         ImageIcon imagenRedimensionada1 = new ImageIcon(img1);
-        sprite = new JLabel(imagenRedimensionada1);
+        spriteNormal = new JLabel(imagenRedimensionada1);
 
-        /* 
-        ImageIcon imagen2 = buscarIcono(".png");
+        ImageIcon imagen2 = buscarIcono("Sources/FondoMuñeca.png");
         Image img2 = imagen2.getImage().getScaledInstance(900, 500, Image.SCALE_SMOOTH);
         ImageIcon imagenRedimensionada2 = new ImageIcon(img2);
         fondoPersonalizado = new JLabel(imagenRedimensionada2);
-        */
 
 
+        ImageIcon imagen3 = buscarIcono("Sources/MuñecaDormida.png");
+        Image img3 = imagen3.getImage().getScaledInstance(350, 300, Image.SCALE_SMOOTH);
+        ImageIcon imagenRedimensionada3 = new ImageIcon(img3);
+        spriteDormido = new JLabel(imagenRedimensionada3);
     }
 
     @Override
-    public void alimentar() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'alimentar'");
+    public String alimentar() {
+        return "Delicioso  o(≧▽≦)o";
     }
 
     @Override
-    public void jugar() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'jugar'");
+    public String jugar() {
+        return "⸜(｡˃ ᵕ ˂ )⸝♡";
+                        
     }
 
     @Override
-    public void dormir() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'dormir'");
-    }
+    public String dormir() {
+            return "zZzZz";
 
-    @Override
-    public void mostrarEstadoDeAnimo() {
+        }
+
+    public String mostrarEstadoDeAnimo() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'mostrarEstadoDeAnimo'");
     }
 
-    @Override
-    public void verEstadoGeneral() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'verEstadoGeneral'");
-    }
+    
     
 }

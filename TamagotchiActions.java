@@ -1,7 +1,8 @@
+
+
 public interface TamagotchiActions{
-    void alimentar();
-    void jugar();
-    void dormir();
-    void mostrarEstadoDeAnimo();
-    void verEstadoGeneral();
+    String alimentar();
+    String jugar();
+    String dormir();
+    String mostrarEstadoDeAnimo();
 }

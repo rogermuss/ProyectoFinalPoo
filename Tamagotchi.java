@@ -1,13 +1,14 @@
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
-public abstract class Tamagotchi{
+public abstract class Tamagotchi implements TamagotchiActions{
     protected  String nombre;
     protected int hambre;
     protected int felicidad;
     protected int energia;
-    protected JLabel sprite;
-    protected JLabel fondoPersonalizado;
+    protected JLabel spriteNormal;
+    protected JLabel spriteDormido;
+    protected JLabel fondoPersonalizado = new JLabel();
 
     public Tamagotchi(String nombre) {
         this.nombre = nombre;
@@ -16,6 +17,9 @@ public abstract class Tamagotchi{
         energia = 100;
     }
 
+    public void setSpriteNormal(JLabel sprite) {
+        this.spriteNormal = sprite;
+    }
     public void setEnergia(int energia) {
         this.energia = energia;
     }
@@ -44,16 +48,17 @@ public abstract class Tamagotchi{
         return nombre;
     }
 
-    public JLabel getSprite() {
-        return sprite;
+    public JLabel getSpriteNormal() {
+        return spriteNormal;
+    }
+    
+    public JLabel getSpriteDormido() {
+        return spriteDormido;
     }
 
-
-    public abstract void mostrarEstadoDeAnimo();
-
-    
-    public abstract void verEstadoGeneral();
-
+    public JLabel getFondoPersonalizado() {
+        return fondoPersonalizado;
+    }
 
 
     public ImageIcon buscarIcono(String ruta){

@@ -1,11 +1,20 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -27,8 +36,16 @@ public class InstanciaTamagotchi extends JFrame{
     private JButton opcionAlimentar = new JButton("Alimentar");
     private JButton opcionJugar = new JButton("Jugar");
     private JButton opcionDormir = new JButton("Dormir");
+    private JLabel labelNombreTamagotchi;
+    private JLabel labelTamagotchi;
     private boolean vivo = true;
     private String razonDeMuerte;
+    private Thread hiloComida;
+    private Thread hiloDormir;
+    private Thread hiloClick;
+    private JLabel alimento = new JLabel();
+    private JLayeredPane layeredPane;
+
 
 
     private Tamagotchi tamagotchi;
@@ -38,7 +55,7 @@ public class InstanciaTamagotchi extends JFrame{
         setSize(XSIZE, YSIZE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(new Color(0xEA895F));
+        getContentPane().setBackground(new Color(0x83C0DF));
         setResizable(false);
         setLocationRelativeTo(null);
 
@@ -111,23 +128,60 @@ public class InstanciaTamagotchi extends JFrame{
         panelAcciones.add(opcionDormir);
         //Implementar Fondo personalizado para cada tamagotchi
 
+        //Panel estado de animo y nombre
+        JPanel panelNorte = new JPanel(new FlowLayout());
+        panelNorte.setBackground(new Color(0x83C0DF));
 
         //Nombre TAMAGOTCHI
-        JLabel labelTamagotchi = new JLabel(nombre);
-        labelTamagotchi.setFont(new Font("Noto Sans", Font.BOLD, 32));
-        labelTamagotchi.setForeground(Color.white);
-        labelTamagotchi.setHorizontalAlignment(SwingConstants.CENTER);
+        labelNombreTamagotchi = new JLabel(nombre);
+        labelNombreTamagotchi.setFont(new Font("Noto Sans", Font.BOLD, 32));
+        labelNombreTamagotchi.setForeground(Color.white);
+        labelNombreTamagotchi.setHorizontalAlignment(SwingConstants.CENTER);
 
+
+        //Boton Estado de animo
+        JButton opcionMostrarEstado = new JButton("Estado de Animo");
+        opcionMostrarEstado.setBackground(new Color(0xb988b8)); 
+        opcionMostrarEstado.setForeground(Color.WHITE);
+        opcionMostrarEstado.setFocusPainted(false);
+        opcionMostrarEstado.setOpaque(true);
+
+        panelNorte.add(labelNombreTamagotchi);
+        panelNorte.add(opcionMostrarEstado);
+
+        // Crear un JLayeredPane para manejar capas
+        layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(XSIZE, YSIZE));
+
+        // Configurar el fondo para que ocupe todo el espacio
+        JLabel fondoPersonalizado = tamagotchi.getFondoPersonalizado();
+        fondoPersonalizado.setBounds(0, 0, XSIZE-150, YSIZE-100);
+        layeredPane.add(fondoPersonalizado, Integer.valueOf(0)); // Capa más baja (fondo)
+
+        // Configurar el sprite del tamagotchi
+        labelTamagotchi = tamagotchi.getSpriteNormal();
+        labelTamagotchi.setBounds(100, 100, 
+                         labelTamagotchi.getPreferredSize().width, 
+                         labelTamagotchi.getPreferredSize().height);
+        layeredPane.add(labelTamagotchi, Integer.valueOf(1)); // Capa sobre el fondo
+
+        // Añadir el layeredPane al centro del frame
+        add(layeredPane, BorderLayout.CENTER);
+
+        labelTamagotchi = tamagotchi.getSpriteNormal();
 
         add(panelAcciones,BorderLayout.SOUTH);
-        add(labelTamagotchi,BorderLayout.NORTH);
-        add(tamagotchi.getSprite(), BorderLayout.CENTER);
         add(nivelesDeNecesidad, BorderLayout.WEST);
+        add(panelNorte,BorderLayout.NORTH);
 
         reducirBarraDeHambre();
         reducirBarraDeEnergia();
         reducirBarraDeFelicidad();
         comprobacionEstadoTamagotchi();
+        opcionAlimentar();
+        opcionDormir();
+        opcionMostrarEstado();
+        eventoClickTamagotchi();
 
         setVisible(true);
 
@@ -151,7 +205,8 @@ public class InstanciaTamagotchi extends JFrame{
 
                     // Actualiza la barra en el hilo de la interfaz
                     SwingUtilities.invokeLater(() -> {
-                    barraAlimentacion.setString("Hambre "+tamagotchi.getHambre());
+                        barraAlimentacion.setValue(tamagotchi.getHambre());
+                        barraAlimentacion.setString("Hambre "+tamagotchi.getHambre());
                     });
                 }
                 else{
@@ -169,7 +224,7 @@ public class InstanciaTamagotchi extends JFrame{
             while (vivo) {
                 if (tamagotchi.getFelicidad() > 0) {
                     try {
-                        Thread.sleep(15000); // Espera 10 segundos
+                        Thread.sleep(12000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -178,7 +233,8 @@ public class InstanciaTamagotchi extends JFrame{
 
                     // Actualiza la barra en el hilo de la interfaz
                     SwingUtilities.invokeLater(() -> {
-                    barraFelicidad.setString("Felicidad "+tamagotchi.getFelicidad());
+                        barraFelicidad.setValue(tamagotchi.getFelicidad());
+                        barraFelicidad.setString("Felicidad "+tamagotchi.getFelicidad());
                     });
                 }
                 else{
@@ -205,7 +261,9 @@ public class InstanciaTamagotchi extends JFrame{
 
                     // Actualiza la barra en el hilo de la interfaz
                     SwingUtilities.invokeLater(() -> {
-                    barraEnergia.setString("Energia "+ tamagotchi.getEnergia());
+                        barraEnergia.setValue(tamagotchi.getEnergia());
+                        barraEnergia.setString("Energia "+ tamagotchi.getEnergia());
+                
                     });
                 }
                 else{
@@ -223,8 +281,7 @@ public class InstanciaTamagotchi extends JFrame{
         Thread hiloComprobacionEstado = new Thread(()-> {
             while(vivo){
                 try {
-                    Thread.sleep(1000);
-                    System.out.println(vivo);
+                    Thread.sleep(1500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -241,6 +298,208 @@ public class InstanciaTamagotchi extends JFrame{
     }
 
 
+    public void opcionAlimentar(){
+    opcionAlimentar.addActionListener(e -> {
+        if(opcionDormir.isEnabled()){
+        String[] opciones = {"Flan", "Pastel de Fresa", "Pay de Limon", "Ramen", "Rollo de Fresa", "Pollo Horneado"};
+
+        // Crear el diálogo personalizado
+        JDialog dialogo = new JDialog((Frame) null, "Seleccion Alimentos", true);
+        dialogo.setLayout(new BorderLayout());
+
+        // Mensaje
+        JLabel mensaje = new JLabel("Elige el alimento para tu mascota: ", JLabel.LEFT);
+        mensaje.setIconTextGap(30);
+        mensaje.setFont(new Font("Brush Script MT", Font.PLAIN, 40));
+        mensaje.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        dialogo.add(mensaje, BorderLayout.NORTH);
+        dialogo.getContentPane().setBackground(new Color(0xFFF5E6)); // color claro pastel, por ejemplo;
+
+        // Panel de botones
+        JPanel panelBotones = new JPanel(new GridLayout(1, opciones.length, 5, 5));
+        panelBotones.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 20));
+        panelBotones.setBackground(new Color(0xFFF5E6));
+
+        for (int i = 0; i < opciones.length; i++) {
+            JButton boton = new JButton(opciones[i]);
+            boton.setBackground(new Color(0xFF6961));
+            boton.setFocusPainted(false);
+            boton.setForeground(Color.WHITE);
+            int opcion = i; // capturar índice
+            boton.addActionListener(o -> {
+                dialogo.dispose();
+                alimento.setText(tamagotchi.alimentar());
+                alimento.setFont(new Font("Monospaced", Font.BOLD, 20));
+                alimento.setVerticalTextPosition(JLabel.NORTH);
+                alimento.setHorizontalTextPosition(JLabel.CENTER);
+
+                // Luego intentamos establecer el ícono de comida
+                ImageIcon iconoComida = tamagotchi.buscarIcono("Sources/Comida" + (opcion + 1) + ".gif");
+                
+                if (iconoComida.getIconWidth() > 0) {  // Verificamos que el ícono se cargó correctamente
+                    alimento.setIcon(iconoComida);
+                } else {
+                    System.err.println("No se pudo cargar el ícono: Comida" + (opcion + 1) + ".gif");
+                }
+                
+                //URGENTEEEEEEEEEEEEEEE
+                /*Hace falta agregar como afecta cada alimento a cada tamagochi
+                 *en cuanto a energia, hambre y felicidad*/
+                
+                // Actualizar la barra de alimentación
+                tamagotchi.setHambre(tamagotchi.getHambre() + 10); // Aumentar el hambre (ajusta según necesites)
+                if (tamagotchi.getHambre() > 100) {
+                    tamagotchi.setHambre(100); // Limitar a 100
+                }
+                SwingUtilities.invokeLater(() -> {
+                    barraAlimentacion.setValue(tamagotchi.getHambre());
+                    barraAlimentacion.setString("Hambre " + tamagotchi.getHambre());
+                });
+                
+                // Posicionar y añadir el alimento al layeredPane
+                alimento.setBounds(450, 110, 
+                    alimento.getPreferredSize().width, 
+                    alimento.getPreferredSize().height);
+                  
+                layeredPane.add(alimento, Integer.valueOf(2)); // Capa superior a tamagotchi
+                revalidate();
+                repaint();
+
+                hiloComida = new Thread(() -> {
+                    try {
+                        Thread.sleep(5000);
+                        // Remover el alimento en el hilo de Swing
+                        SwingUtilities.invokeLater(() -> {
+                        layeredPane.remove(alimento);
+                        revalidate();
+                        repaint();
+                    });
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                });
+                hiloComida.start(); // Iniciar el hilo
+            });
+            panelBotones.add(boton);
+        }
+        
+        dialogo.add(panelBotones, BorderLayout.CENTER);
+        dialogo.pack();
+        dialogo.setLocationRelativeTo(null); // centrar en pantalla
+        dialogo.setVisible(true);
+        }
+    });
+}
+
+    public void opcionDormir(){
+        //Agregar la imagen de la mascota ahora durmiendo con letras de zzz en su cabeza, la accion durara 15 segundos
+        opcionDormir.addActionListener(d ->{
+            opcionDormir.setEnabled(false);
+
+            layeredPane.remove(labelTamagotchi);
+            labelTamagotchi = tamagotchi.getSpriteDormido();
+            labelTamagotchi.setBounds(110, 75, 
+                         labelTamagotchi.getPreferredSize().width, 
+                         labelTamagotchi.getPreferredSize().height);
+            layeredPane.add(labelTamagotchi, Integer.valueOf(1));
+            revalidate();
+            repaint();
+
+            hiloDormir = new Thread(()->{
+                for (int i = 0; i < 4; i++) {
+                    try {
+                        Thread.sleep(3750);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    tamagotchi.setEnergia(tamagotchi.getEnergia()+10);
+                    if(tamagotchi.getEnergia() > 100){
+                        tamagotchi.setEnergia(100);
+                    }
+                    SwingUtilities.invokeLater(() -> {
+                        barraEnergia.setValue(tamagotchi.getEnergia());
+                        barraEnergia.setString("Energia " + tamagotchi.getEnergia());
+                    });
+
+                }
+                opcionDormir.setEnabled(true);
+                layeredPane.remove(labelTamagotchi);
+                labelTamagotchi = tamagotchi.getSpriteNormal();
+                labelTamagotchi.setBounds(100, 100, 
+                         labelTamagotchi.getPreferredSize().width, 
+                         labelTamagotchi.getPreferredSize().height);
+                layeredPane.add(labelTamagotchi, Integer.valueOf(1));
+                revalidate();
+                repaint();
+            });
+            hiloDormir.start();
+
+            
+        });
+
+    }
+
+    public void opcionJugar(){
+        //Dicha opcion implementara jugar con un gif de una pelota, un gif de 
+        //tomar te y un gif extra para la implementacion de dicha accion
+
+        //Tomar te dara mas a la muñeca, la pelota dara mas al gato y al perro y la ultima accion sera destinada al cuy.
+        //A su vez implementar Strings a cada mascota.
+
+        //Se implementaran las acciones unicas al jugar con la mascota, tambien se pueden implementar cada cierto tiempo 
+        //dependiendo del estado de la mascota, pero es compicado
+    }
+
+    public void opcionMostrarEstado(){
+        //Pendiente de revisar, se implementara dependiendo del nivel de felicidad, energia y hambre.
+        //Sera un cuadro mas de opcion abrible y cerrable, sera una ventana emergente que te indique el estado del tamagotchi.
+    }
+
+    public void eventoClickTamagotchi(){
+        labelTamagotchi.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                // Ejemplo: aumentar la felicidad al hacer clic
+                tamagotchi.setFelicidad(tamagotchi.getFelicidad() + 1);
+                if (tamagotchi.getFelicidad() > 100) {
+                tamagotchi.setFelicidad(100);
+                }
+
+                ImageIcon gifEstrella = tamagotchi.buscarIcono("Sources/EventoClick.gif");
+                JLabel labelEstrella = new JLabel(gifEstrella);
+                labelEstrella.setBounds(450, 110, 
+                    labelEstrella.getPreferredSize().width, 
+                    labelEstrella.getPreferredSize().height);
+
+                // Actualizar la barra de felicidad
+                SwingUtilities.invokeLater(() -> {
+                    layeredPane.add(labelEstrella,Integer.valueOf(3));
+                    barraFelicidad.setValue(tamagotchi.getFelicidad());
+                    barraFelicidad.setString("Felicidad " + tamagotchi.getFelicidad());
+                    revalidate();
+                    repaint();
+                 });
+
+
+
+                
+
+                 hiloClick = new Thread(()->{
+                    try {
+                        Thread.sleep(2000);
+                        SwingUtilities.invokeLater(() -> {
+                        layeredPane.remove(labelEstrella);
+                        revalidate();
+                        repaint();
+                        });
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                 });
+                 hiloClick.start();
+        
+            }
+        });
+    }
 
 
     public static void main(String[] args) {
